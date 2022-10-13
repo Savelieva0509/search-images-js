@@ -8,6 +8,19 @@
     <script type="module" src="./index.js"></script>
   </head>
   <body>
+<form class="search-form" id="search-form">
+  <input type="text" name="searchQuery" autocomplete="off" placeholder="Search images..." />
+  <button type="submit">Search
+    <svg class="search__icon" width="20" height="20">
+      <use href="#"></use>
+    </svg>
+  </button>
+</form>
+<ul class="gallery js-gallery list"></ul>
+
+<button type="button" class="load-more is-hidden">LOAD MORE
+</button>
+
     <!-- ❗️❗️❗️ Add partials like so for every page -->
     <include src="./partials/example.html"></include>
   </body>
