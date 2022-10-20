@@ -1,47 +1,11 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { PixabayAPI } from "./PixabayAPI";
-import { createMarkup, simpleLightbox, scroll } from './createMarkup';
+import { createMarkup } from './createMarkup';
 import { refs } from './refs';
-import SimpleLightbox from "simplelightbox";
-import "simplelightbox/dist/simple-lightbox.min.css";
 
 const pixabay = new PixabayAPI();
 
-const options = {
-    root: null,
-    rootMargin: '100px',
-    threshold: 1.0
-}
-const callback = async function (entries, observer) {
-    entries.forEach(async entry => {
-        if (entry.isIntersecting && entry.intersectionRect.bottom > 550) {
-           
-            pixabay.incrementPage();
-            observer.unobserve(entry.target);
-
-            try {
-                const { hits } = await pixabay.getPhotos();
-                const markup = createMarkup(hits);
-                simpleLightbox();
-   
-                refs.list.insertAdjacentHTML('beforeend', markup);
-
-                if (pixabay.isShowLoadMore) {
-                    const target = document.querySelector('.photo-card:last-child');
-                    io.observe(target);
-            }
-
-            } catch (error) {
-                Notify.error('Something goes wrong');
-                clearPage();
-            }
-        }
-    })
-}
-
-const io = new IntersectionObserver(callback, options);
-
-const handleSubmit = async (event) => {
+const handleSubmit = (event) => {
   event.preventDefault()
     
     const {
@@ -58,82 +22,53 @@ const handleSubmit = async (event) => {
 
     clearPage();
 
-    try {
-        const { hits, total } = await pixabay.getPhotos();
-           
+    pixabay
+        .getPhotos(search)
+        .then(({ hits, total }) => {
+
         if (hits.length === 0) {
-            Notify.info(`No images found for your '${search}' request.`);
+            Notify.info(`No images found for your '${search}' request.`)
             return;
         }
-
+            
         const markup = createMarkup(hits);
         refs.list.insertAdjacentHTML('beforeend', markup);
-      
-        simpleLightbox();
+        
         pixabay.calculateTotalPages(total);
 
         Notify.success(`We found ${total} images by request '${search}'.`)
-       
         if (pixabay.isShowLoadMore) {
-            // refs.loadMoreBtn.classList.remove('is-hidden');
-        const target = document.querySelector('.photo-card:last-child');
-        io.observe(target);
+            refs.loadMoreBtn.classList.remove('is-hidden');
         }
-
-    } catch (error) {
+    }).catch(error => {
         Notify.error('Something goes wrong');
         clearPage();
-    }
-
-    // pixabay
-    //     .getPhotos(search)
-    //     .then(({ hits, total }) => {
-
-    //     if (hits.length === 0) {
-    //         Notify.info(`No images found for your '${search}' request.`)
-    //         return;
-    //     }
-            
-    //     const markup = createMarkup(hits);
-    //     refs.list.insertAdjacentHTML('beforeend', markup);
-        
-    //     pixabay.calculateTotalPages(total);
-
-    //     Notify.success(`We found ${total} images by request '${search}'.`)
-    //     if (pixabay.isShowLoadMore) {
-    //         refs.loadMoreBtn.classList.remove('is-hidden');
-    //     }
-    // }).catch(error => {
-    //     Notify.error('Something goes wrong');
-    //     clearPage();
-    // });
+    });
 }
 
-// const onLoadMore = () => {
-//     pixabay.incrementPage();
+const onLoadMore = () => {
+    pixabay.incrementPage();
     
-//     if (!pixabay.isShowLoadMore) {
-//         refs.loadMoreBtn.classList.add('is-hidden');
-//         }
+    if (!pixabay.isShowLoadMore) {
+        refs.loadMoreBtn.classList.add('is-hidden');
+        }
 
-//     pixabay.getPhotos().then(({ hits, }) => {
-//         const markup = createMarkup(hits);
+    pixabay.getPhotos().then(({ hits, }) => {
+        const markup = createMarkup(hits);
    
-//         refs.list.insertAdjacentHTML('beforeend', markup);
+        refs.list.insertAdjacentHTML('beforeend', markup);
         
-//     }).catch(error => {
-//         Notify.error('Something goes wrong');
-//         clearPage();
-//     });
+    }).catch(error => {
+        Notify.error('Something goes wrong');
+        clearPage();
+    });
+};
 
-// };
-
- 
 refs.form.addEventListener("submit", handleSubmit);
-// refs.loadMoreBtn.addEventListener('click', onLoadMore);
+refs.loadMoreBtn.addEventListener('click', onLoadMore);
 
 function clearPage() {
     pixabay.resetPage()
     refs.list.innerHTML = '';
-    // refs.loadMoreBtn.classList.add('is-hidden');
+    refs.loadMoreBtn.classList.add('is-hidden');
 }
