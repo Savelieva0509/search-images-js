@@ -1,7 +1,9 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { PixabayAPI } from "./PixabayAPI";
-import { createMarkup } from './createMarkup';
+import { createMarkup, simpleLightbox, scroll } from './createMarkup';
 import { refs } from './refs';
+import SimpleLightbox from "simplelightbox";
+import "simplelightbox/dist/simple-lightbox.min.css";
 
 const pixabay = new PixabayAPI();
 
@@ -17,10 +19,10 @@ const callback = async function (entries, observer) {
             pixabay.incrementPage();
             observer.unobserve(entry.target);
 
-
             try {
                 const { hits } = await pixabay.getPhotos();
                 const markup = createMarkup(hits);
+                simpleLightbox();
    
                 refs.list.insertAdjacentHTML('beforeend', markup);
 
@@ -66,7 +68,8 @@ const handleSubmit = async (event) => {
 
         const markup = createMarkup(hits);
         refs.list.insertAdjacentHTML('beforeend', markup);
-        
+      
+        simpleLightbox();
         pixabay.calculateTotalPages(total);
 
         Notify.success(`We found ${total} images by request '${search}'.`)
@@ -106,30 +109,31 @@ const handleSubmit = async (event) => {
     // });
 }
 
-const onLoadMore = () => {
-    pixabay.incrementPage();
+// const onLoadMore = () => {
+//     pixabay.incrementPage();
     
-    if (!pixabay.isShowLoadMore) {
-        refs.loadMoreBtn.classList.add('is-hidden');
-        }
+//     if (!pixabay.isShowLoadMore) {
+//         refs.loadMoreBtn.classList.add('is-hidden');
+//         }
 
-    pixabay.getPhotos().then(({ hits, }) => {
-        const markup = createMarkup(hits);
+//     pixabay.getPhotos().then(({ hits, }) => {
+//         const markup = createMarkup(hits);
    
-        refs.list.insertAdjacentHTML('beforeend', markup);
+//         refs.list.insertAdjacentHTML('beforeend', markup);
         
-    }).catch(error => {
-        Notify.error('Something goes wrong');
-        clearPage();
-    });
-};
+//     }).catch(error => {
+//         Notify.error('Something goes wrong');
+//         clearPage();
+//     });
 
+// };
+
+ 
 refs.form.addEventListener("submit", handleSubmit);
-refs.loadMoreBtn.addEventListener('click', onLoadMore);
+// refs.loadMoreBtn.addEventListener('click', onLoadMore);
 
 function clearPage() {
     pixabay.resetPage()
     refs.list.innerHTML = '';
-    refs.loadMoreBtn.classList.add('is-hidden');
+    // refs.loadMoreBtn.classList.add('is-hidden');
 }
-
