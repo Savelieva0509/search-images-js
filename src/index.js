@@ -2,6 +2,8 @@ import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { PixabayAPI } from "./PixabayAPI";
 import { createMarkup } from './createMarkup';
 import { refs } from './refs';
+import { simpleLightbox, scroll } from './simple_scroll';
+
 
 const pixabay = new PixabayAPI();
 
