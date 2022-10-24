@@ -34,8 +34,7 @@ const handleSubmit = async (event) => {
         refs.list.insertAdjacentHTML('beforeend', markup);
         
         simpleLightbox();
-        scroll();
-        
+
         pixabay.calculateTotalPages(total);
 
         Notify.success(`We found ${total} images by request '${search}'.`)
@@ -71,8 +70,9 @@ const handleSubmit = async (event) => {
     //     });
     // }
 
-    const onLoadMore = () => {
-        pixabay.incrementPage();
+const onLoadMore = () => {
+    pixabay.incrementPage();
+
     
         if (!pixabay.isShowLoadMore) {
             refs.loadMoreBtn.classList.add('is-hidden');
@@ -80,13 +80,13 @@ const handleSubmit = async (event) => {
 
         pixabay.getPhotos().then(({ hits, }) => {
             const markup = createMarkup(hits);
-   
             refs.list.insertAdjacentHTML('beforeend', markup);
-        
+            scroll();
         }).catch(error => {
             Notify.error('Something goes wrong');
             clearPage();
         });
+      
     };
 
     refs.form.addEventListener("submit", handleSubmit);
